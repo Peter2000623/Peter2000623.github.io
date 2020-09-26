@@ -1,0 +1,600 @@
+<head>
+  <style>
+    * {
+        box-sizing: border-box;
+    }
+    .row {
+    display: flex;
+    }
+  
+  .column {
+      flex: 33.33333%
+      padding: 5px;
+  }
+
+
+  </style>
+</head>
+
+<body style="margin-left:15%; margin-right:15%; margin-top:3%; margin-bottom:10%; background-color:powderblue;">
+<h1 style="text-align:center; margin-bottom:-10px">CS194-26 Project 2</h1>
+<h2 style="text-align:center;">Fun with Filters and Frequencies! </h2>
+
+<h2> Part 1: Fun with Filters</h2>
+<p>In this part, I have explored the magic of using a basic filter and convolution technology to get some properties of the image such as derivatives and further calculate the gradients. Combined with it, I have also explored the gaussian filter in some ways.</p>
+<h3> Part 1.1: Finite Difference Operator</h3>
+<p>The first part is to play with the basic filter of derivatives in both x and  y direction on an original cameraman image.</p>
+<p>First, I used dx = [1, -1] and dy = [1, -1].T to convolute with the original
+    cameraman photo to get the derivative of x and y.
+    Second, I computed the magnitude of the gradient using the formula
+    np.sqrt(dx^2 + dy^2).
+    Third, I computed the magnitude of the orientaion of the gradient using the
+    formula np.arctan2(-dy, dx). (The grdient is imploved by setting values greater
+    than a certain threshold to 1 and 0 for values under the threshold.)</p>
+    
+<div class="row">
+    <figure>
+        <img src="./data/cameraman.png" style="width:50%">
+        <figcaption> Original Image </figcaption>
+    </figure>
+</div>
+<div class="row">
+    <figure class="column">
+        <img src="./data/1.1_dx.jpg" style="width:50%">
+        <figcaption> Partial Derivative in x </figcaption>
+    </figure>
+
+    <figure class="column">
+        <img src="./data/1.1_dy.jpg" style="width:50%">
+        <figcaption> Partial Derivative in y </figcaption>
+    </figure>
+</div>
+    
+<div class="row">
+    <figure class="column">
+        <img src="./data/1.1_gradient.jpg" style="width:50%">
+        <figcaption> Gradient Magnitude </figcaption>
+    </figure>
+
+    <figure class="column">
+        <img src="./data/1.1_orientation.jpg" style="width:50%">
+        <figcaption> Orientation of the Gradient </figcaption>
+    </figure>
+</div>
+
+
+<h2> Part 1.2: Derivative of Gaussian (DoG) Filter</h2>
+<P> For this second part, I have explored the power of Gaussian filter by first using it to blur the image and then calculate the derivatives.</p>
+<p>First, I convoluted the original cameraman image with a Gaussian filter of size of 5 and sigma of 1 to blur it. Then, I applied dx and dy filter and calculate the derivatives as previous part. After that, with the properties of convolution, I change the order of calcultion by first convolute the Gaussian with the derivative filters and then applied the whole filters to the original image. And being verified, we get the same results (with some variation since I used a threshold).  </p>
+<p>What we can see about the advantages of using gaussian filter is that it filters out the very high frequency features of the image such as the grass in this photo (for the one didn't use DoG, the grass part has all those small dots). Because of that, the gradient will show clearer and more obvious edges like we human can see.  </p>
+<div class="row">
+    <figure class="column">
+        <img src="./data/gaussian_pic.jpg" style="width:50%">
+        <figcaption> Blurred Cameraman</figcaption>
+    </figure>
+</div>
+<div class="row">
+    <figure class="column">
+        <img src="./data/1.2_gaussian_dx_pic_combined.jpg" style="width:50%">
+        <figcaption> Partial Derivative in x </figcaption>
+    </figure>
+
+    <figure class="column">
+        <img src="./data/1.2_gaussian_dy_pic_combined.jpg" style="width:50%">
+        <figcaption> Partial Derivative in y </figcaption>
+    </figure>
+</div>
+<div class="row">
+    <figure class="column">
+        <img src="./data/1.2_gaussian_gradient_pic_combined.jpg" style="width:50%">
+        <figcaption> Gradient Magnitude </figcaption>
+    </figure>
+
+    <figure class="column">
+        <img src="./data/1.2_orientation_pic_combined.jpg" style="width:50%">
+        <figcaption> Orientation of the Gradient  </figcaption>
+    </figure>
+</div>
+   
+<h2> Part 1.3: Image Straightening</h2>
+<p>This part is pretty fun. It enables us to "straighten" a image. By "straighten", it means to get the horizontal and vertical lines maximized. Then, how should we detect those horizontal and vertical lines and see if they are straight enough?
+</p>
+<p> The idea is to use the previous parts filters to calculate the gradient and orientation of the image and using a range search of angle to determine the angle with the most percentage of "valid" edges in a selected region.
+</p>
+<p> The specifc process I used is: First, apply the image with the DoG and calculate the gradient including its magnitude and orientation. Second, I transfer the orientation in range [-pi, pi] and used a helper function to count all the edges that lies in the range I set [-185, -175], [-95, -85], [-5, 5], [85, 95], and [175, 185]. Third, I used a loop in a certain range of angles to search for the best one by calculating all the valid edges in a selected region. The region needs to be selected at the part that potentially has more horizontal and vertical lines. The region also needs to be at middle of the image to avoid edge effect of rotating of an image. I didn't search for a whole large range of angle but instead using a range of around 30 degrees. We can select the range by first visually determine the approximate angle or doing more sets of calculations by moving the range around.
+</p>
+
+<div class="row">
+    <figure class="column">
+        <img src="./data/facade.jpg" style="width:80%">
+        <figcaption> Original "Facade" Image </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/1.3_facade.jpg" style="width:80%">
+        <figcaption> Straightened "Facade" Image</figcaption>
+    </figure>
+</div>
+<div class="row">
+    <figure class="column">
+        <img src="./data/1.3_faced_plot.png" style="width:80%">
+        <figcaption> Degree detection for "Facade" </figcaption>
+    </figure>
+    
+    <figure class="column">
+        <img src="./data/1.3_faced_hist.png" style="width:80%">
+        <figcaption> Edge detection for straigntened "Facade" </figcaption>
+    </figure>
+</div>
+
+
+<div class="row">
+    <figure class="column">
+        <img src="./data/1.3_1_1.jpg" style="width:80%">
+        <figcaption> Original "Building" Image </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/1.3_1_2.jpg" style="width:80%">
+        <figcaption> Straightened "Building" Image </figcaption>
+    </figure>
+</div>
+<div class="row">
+    <figure class="column">
+        <img src="./data/1.3_lou_plot.png" style="width:80%">
+        <figcaption> Degree detection for "Building" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/1.3_lou_hist.png" style="width:80%">
+        <figcaption> Edge detection for straigntened "Building" </figcaption>
+    </figure>
+</div>
+    
+<div class="row">
+    <figure class="column">
+        <img src="./data/1.3_3_1.jpg" style="width:80%">
+        <figcaption> Original "Fence" Image </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/1.3_3_2.jpg" style="width:80%">
+        <figcaption> Straightened "Fence" Image </figcaption>
+    </figure>
+</div>
+<div class="row">
+    <figure class="column">
+        <img src="./data/1.3_zhalan_plot.png" style="width:80%">
+        <figcaption> Degree detection for "Fence" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/1.3_zhalan_hist.png" style="width:80%">
+        <figcaption> Edge detection for straigntened "Fence" </figcaption>
+    </figure>
+</div>
+<p> We can see for the degree with the highest percentage of valid edges, there are modes for the edge histogram at [-180, -90, 0, 90, 180], which is very reasonable at we predicted.
+</p>
+
+<h3> Failed Case</h3>
+<p>
+The following image of a trees is a failed case. Looking through the edge plot, one reason may because there are lots of branches, which is pointing to different orientation and the method we are using just choose one direction of which the most of the branches pointing at, which is not the case we want.
+</p>
+<p>
+One possible solution for this,I believe, is to use a gaussian filter with higher sigma to filter out more branches. However, that may cause too many being filtered and left only very few features for us to calculate on.
+</p>
+<div class="row">
+    <figure class="column">
+        <img src="./data/1.3_2.jpeg" style="width:80%">
+        <figcaption> Original "Tree" Image </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/1.3_2_2.jpg" style="width:80%">
+        <figcaption> Straightened "Tree" Image </figcaption>
+    </figure>
+</div>
+<div class="row">
+    <figure class="column">
+        <img src="./data/1.3_shu_plot.png" style="width:80%">
+        <figcaption> Degree detection for "Tree" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/1.3_shu_hist.png" style="width:80%">
+        <figcaption> Edge detection for straigntened "Tree" </figcaption>
+    </figure>
+</div>
+
+<h2> Part 2: Fun with Frequencies</h2>
+<h3> Part 2.1: Image "Sharpening"</h3>
+<p> For this part, we need to "sharpen" the image by bringing more wight to its edges. We can do this by using the Gaussian filter, which has the property to filter out the high frequency of the image. Therefore, by substracting that from the original image, we can get the part being filtered out, which is the high frequency part that we want. After that, just add that high-freq part to the original image, we will get one new image with edges being sharpened.
+</p>
+
+<div class="row">
+    <figure class="column">
+        <img src="./data/taj.jpg" style="width:80%">
+        <figcaption> Original "Taj" Image </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/taj_clearer.jpg" style="width:80%">
+        <figcaption> Sharpened "Taj" Image </figcaption>
+    </figure>
+</div>
+<div class="row">
+    <figure class="column">
+        <img src="./data/2.1_1.jpg" style="width:80%">
+        <figcaption> Original "Skewer" Image </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/2.1_1_2.jpg" style="width:80%">
+        <figcaption> Sharpened "Skewer" Image </figcaption>
+    </figure>
+</div>
+
+<div class="row">
+    <figure class="column">
+        <img src="./data/2.1_2.jpg" style="width:80%">
+        <figcaption> Original "Spaghetti" Image </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/2.1_2_2.jpeg" style="width:80%">
+        <figcaption> Sharpened "Spaghetti" Image </figcaption>
+    </figure>
+</div>
+
+<p>Sharpen a blurred image</p>
+<div class="row">
+    <figure class="column">
+        <img src="./data/2.1_2.jpg" style="width:80%">
+        <figcaption> Original "Spaghetti" Image </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./output/spg_blurred.jpg" style="width:80%">
+        <figcaption> Blurred "Spaghetti" Image </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/2.1_2_2_blurred.jpeg" style="width:80%">
+        <figcaption> Sharpened "Spaghetti" Image </figcaption>
+    </figure>
+</div>
+
+<h3> Part 2.2: Hybrid Images</h3>
+<p> For this part, we used the idea from SIGGRAPH 2006 paper by Oliva, Torralba, and Schyns to hybrid two images into one in a way that when people look at a closer distance, they will see one image while look at a far distance, they will see the other image. The magic behind that is to play with the frequencies so that one image occupies the high frequency range while the other possesses the low frequeny. When people look from a closer distance, the eyes distinct the high frequency more while from a large distance, the eyes can only tell the difference that happens in low frequency.
+</p>
+
+<p> Hence, we only need to find a way to extract the high frequency and low frequency and join them together under a certain weights. We can do that using Gaussian filter because again, it's the magic tool to filter out the high frequency and substract that we can also get the high-freq part as well.
+</p>
+
+<p> The specifc process I did is: First, picking two points from each image that I want to combine so that later I can use two points to align and anchor the images. Second, I used the python starting code to align the image. Third, I applied the Gaussian filter to get the corresponding low and high frequency of the images. Last, I joined the low and high "parts" of the images together using a certain weight.
+</p>
+
+<div class="row">
+    <figure class="column">
+        <img src="./data/DerekPicture.jpg" style="width:100%">
+        <figcaption> Original Image "Derek" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/nutmeg.jpg" style="width:100%">
+        <figcaption> Original Image "nutmeg" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./output/hybrid.jpg" style="width:100%">
+        <figcaption> Hybrid Image "Derek-nutmeg" </figcaption>
+    </figure>
+</div>
+
+<p> Below is the hybrid of the image of my sister and an image of myself. Finally realize how close we look like.
+</p>
+<div class="row">
+    <figure class="column">
+        <img src="./data/sh.jpg" style="width:100%">
+        <figcaption> Original Image "Sister - HS" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/sy.png" style="width:100%">
+        <figcaption> Original Image "Myself - YS" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./output/sh_sy.jpg" style="width:100%">
+        <figcaption> Hybrid Image "Family - HY" </figcaption>
+    </figure>
+</div>
+
+<p> The hybrid of my favorite CS:GO players Niko and Somebody. Got to admit, somebody really has some "high-frequency" features.
+</p>
+<div class="row">
+    <figure class="column">
+        <img src="./data/niko.jpg" style="width:100%">
+        <figcaption> Original Image "Niko" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/somebody.jpg" style="width:100%">
+        <figcaption> Original Image "Somebody" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/somebody_niko.jpg" style="width:100%">
+        <figcaption> Hybrid Image "SomeNiko" </figcaption>
+    </figure>
+</div>
+
+<p> Let's see the log magnitudes of their Fourier transforms.</p>
+
+<div class="row">
+    <figure class="column">
+        <img src=".//output/someniko_fft.png" style="width:100%">
+        <figcaption> Fourier Transform of the hybrid image, "SomeNiko" </figcaption>
+    </figure>
+</div>
+<div class="row">
+    <figure class="column">
+        <img src=".//output/somebody_fft.png" style="width:100%">
+        <figcaption> Fourier Transform of "Somebody" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/somebody_high_fft.png" style="width:100%">
+        <figcaption> Fourier Transform of high-freq "Somebody" </figcaption>
+    </figure>
+</div>
+<div class="row">
+    <figure class="column">
+        <img src=".//output/niko_fft.png" style="width:100%">
+        <figcaption> Fourier Transform of "Niko" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/niko_low_fft.png" style="width:100%">
+        <figcaption> Fourier Transform of low-freq "Niko" </figcaption>
+    </figure>
+</div>
+
+<h3>Bells & Whistles</h3>
+<p> I tried to apply the color for the high freq part as showed two images above. I think it looks better because it amplifies the high freq part when we look at closer distance. when we look from a very far distance, we still can't see those high-frequenct edges.
+</p>
+
+<h2>Part 2.3: Gaussian and Laplacian Stacks </h2>
+<p> In this part, I explored the Gaussian and Laplacian Stacks. The stacks are just like a pyramid but without downsizing. The sigma of the Gaussian filter is the one that increases with the layer.
+</p>
+<P> For the Gaussian stack, it's just a stack of images that uses different value of sigmas, which are increasing with the layer.
+</p>
+<p> For the Laplacian stack, it composes of images from the difference of each consecutive layer image of Gaussian stack. The stack has the property to investigate on features at different frequencies.
+</p>
+<p> The followings are the Gaussian and Laplacian stacks of the Salvador Dali's painting of Lincoln and Gala using original sigam of 1 and factor of 2 over layers.</p>
+<div class="row">
+    <figure class="column">
+        <img src="./data/gala.jpg" style="width:30%">
+        <figcaption> Original Painting of Lincoln and Gala by Salvador Dali </figcaption>
+    </figure>
+</div>
+
+<h3> Gaussian Stack</h3>
+
+<div class="row">
+    <figure class="column">
+        <img src=".//output/gala_gaussian_0.jpg" style="width:100%">
+        <figcaption> Level 1 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/gala_gaussian_1.jpg" style="width:100%">
+        <figcaption> Level 2 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/gala_gaussian_2.jpg"  style="width:100%;">
+        <figcaption> Level 3 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/gala_gaussian_3.jpg"  style="width:100%">
+        <figcaption> Level 4 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/gala_gaussian_4.jpg"  style="width:100%;">
+        <figcaption> Level 5 </figcaption>
+    </figure>
+</div>
+
+<h3> Laplacian Stack</h3>
+
+<div class="row">
+    <figure class="column">
+        <img src=".//output/gala_laplacian_0.jpg" style="width:100%">
+        <figcaption> Level 1 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/gala_laplacian_1.jpg" style="width:100%">
+        <figcaption> Level 2 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/gala_laplacian_2.jpg"  style="width:100%;">
+        <figcaption> Level 3 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/gala_laplacian_3.jpg"  style="width:100%">
+        <figcaption> Level 4 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/gala_laplacian_4.jpg"  style="width:100%;">
+        <figcaption> Level 5 </figcaption>
+    </figure>
+</div>
+
+<p> The followings are the Gaussian and Laplacian stacks for the hybrid image "SomeNiko" </p>
+
+<h3> Gaussian Stack</h3>
+
+<div class="row">
+    <figure class="column">
+        <img src=".//output/someniko_gaussian_0.jpg" style="width:100%">
+        <figcaption> Level 1 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/someniko_gaussian_1.jpg" style="width:100%">
+        <figcaption> Level 2 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/someniko_gaussian_2.jpg"  style="width:100%;">
+        <figcaption> Level 3 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/someniko_gaussian_3.jpg"  style="width:100%">
+        <figcaption> Level 4 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/someniko_gaussian_4.jpg"  style="width:100%;">
+        <figcaption> Level 5 </figcaption>
+    </figure>
+</div>
+
+<h3> Laplacian Stack</h3>
+
+<div class="row">
+    <figure class="column">
+        <img src=".//output/someniko_laplacian_0.jpg" style="width:100%">
+        <figcaption> Level 1 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/someniko_laplacian_1.jpg" style="width:100%">
+        <figcaption> Level 2 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/someniko_laplacian_2.jpg"  style="width:100%;">
+        <figcaption> Level 3 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/someniko_laplacian_3.jpg"  style="width:100%">
+        <figcaption> Level 4 </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/someniko_laplacian_4.jpg"  style="width:100%;">
+        <figcaption> Level 5 </figcaption>
+    </figure>
+</div>
+
+<h3> Reflection </h3>
+<p> We can see that niko's image is very blurred just at the third level of gaussian while somebody's features are still clear to see in deeper level for example the hair.
+</p>
+<p> I think this is because the gaussian sigma is too large for niko's image so its features are quickly being filtered. One way to solve this, I think, is to adjust the sigma values for niko's image.
+</p>
+
+<h2>Part 2.4: Multiresolution Blending (a.k.a. the oraple!) </h2>
+<p> In this part, we try to blend two images together. Different from the hybrid idea, we want the seam between two images be as natural as possible.
+</p>
+
+<p> The idea to achieve that is to use different indecies for different freqencies of the images so that the higher freqency has more sharp in indecies around seam region while for lower frequencies, we let them knid of stretch out a little bit to blend within each other. Since they are low freqencies, the eyes won't tell much difference at the overlayed part but that will still smooth the seam.
+</p>
+
+<p> To make it practical, we need to choose a mask first and used Gaussian filter to calculate the Gaussian stack of it, which will then be used as the weight of multiplication for each layer. Then, we just need to calculate the laplacian stacks for each image and muptiplied each with the corresponding mask. Then, we can directly add each image at each level to get the laplacian stacks for the blended image. Last, we can just stack all the layers in the laplacian stacks together to get the final blended image.
+</p>
+
+<div class="row">
+    <figure class="column">
+        <img src="./data/apple.jpg" style="width:100%">
+        <figcaption> Original "Apple" Image  </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/oraple.jpg" style="width:100%">
+        <figcaption> Blended "Oraple" Image  </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/orange.jpg" style="width:100%;">
+        <figcaption> Original "Orange" Image  </figcaption>
+    </figure>
+</div>
+
+<p> Irregular mask</p>
+<div class="row">
+    <figure class="column">
+        <img src="./data/mask_2.png" style="width:30%">
+        <figcaption> The irregular mask Image  </figcaption>
+    </figure>
+</div>
+<div class="row">
+    <figure class="column">
+        <img src="./data/somebody_left.jpg" style="width:100%">
+        <figcaption> Original "Somebody" Image  </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/sy_somebody.jpg" style="width:100%">
+        <figcaption> Blended "Power of Idol" Image  </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/sy_2.jpg" style="width:100%;">
+        <figcaption> Original "Myself" Image  </figcaption>
+    </figure>
+</div>
+
+<p>Below is the blended image of the logos from my hometown basketball and football teams: Beijing Jinyu and Beijing Guoan</p>
+<div class="row">
+    <figure class="column">
+        <img src="./data/jinyu.jpg" style="width:100%">
+        <figcaption> Original "Jinyu" Image  </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/guoan_jinyu.jpg" style="width:100%">
+        <figcaption> Blended "Champion" Image  </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/guoan.jpg" style="width:100%;">
+        <figcaption> Original "Guoan" Image  </figcaption>
+    </figure>
+</div>
+
+<div class="row">
+    <figure class="column">
+        <img src="./data/porche.jpg" style="width:100%">
+        <figcaption> Original "Porche" Image  </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/porche_falali.jpg" style="width:100%">
+        <figcaption> Blended "Porrari" Image  </figcaption>
+    </figure>
+    <figure class="column">
+        <img src="./data/falali.jpg" style="width:100%;">
+        <figcaption> Original "Ferrari" Image  </figcaption>
+    </figure>
+</div>
+
+<h3> Laplacian Stacks for Porrari</h3>
+    
+<div class="row">
+    <h3> Level 1 </h3>
+    <figure class="column">
+        <img src=".//output/porche_laplacian_0.jpg" style="width:100%">
+        <figcaption> Original Image "Porche" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/porlali_laplacian_0.jpg" style="width:100%">
+        <figcaption> Blended Image "Porrari" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/falali_laplacian_0.jpg" style="width:100%;">
+        <figcaption> Original Image "Ferrari" </figcaption>
+    </figure>
+</div>
+<div class="row">
+    <h3> Level 2 </h3>
+    <figure class="column">
+        <img src=".//output/porche_laplacian_1.jpg" style="width:100%">
+        <figcaption> Original Image "Porche" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/porlali_laplacian_1.jpg" style="width:100%">
+        <figcaption> Blended Image "Porrari" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/falali_laplacian_1.jpg" style="width:100%;">
+        <figcaption> Original Image "Ferrari" </figcaption>
+    </figure>
+</div>
+<div class="row">
+    <h3> Level 3 </h3>
+    <figure class="column">
+        <img src=".//output/porche_laplacian_2.jpg" style="width:100%">
+        <figcaption> Original Image "Porche" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/porlali_laplacian_2.jpg" style="width:100%">
+        <figcaption> Blended Image "Porrari" </figcaption>
+    </figure>
+    <figure class="column">
+        <img src=".//output/falali_laplacian_2.jpg" style="width:100%;">
+        <figcaption> Original Image "Ferrari" </figcaption>
+    </figure>
+</div>
+
+<h2>What's the most important thing I learned</h2>
+<p>First of all, I don't need photoshop anymore. It all lies within the magic of filter. I think the most important thing I learned is the power of using filters. It enables us to find the edges, to smooth the image, to sepeate one part of the image. The tool is far more magic if it combines with the Gaussian and Laplacian idea to seperate out different frequencies of images. This gives us the power to fool human eyes and even to encode the secret inside a image! Fourier domain is another thing that shocks me since it enpowers us to see the image in a completely different way, a way that our brain and eyes treat pratically. It's through the frequencies! I think this project brings me another perspective of treating the whole image more like we human did instead of how computer did, which is pixel by pixel. It blurrs computer's eyes but makes human's clearer.
+</p>
+</body>
+</html>
